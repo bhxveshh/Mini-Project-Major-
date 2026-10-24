@@ -168,3 +168,22 @@ if real is not None:
             f_, o_ = real[k][msk, 3], met[origins[msk] + k, 3]
             print(f"{sname} lead {k}d rain: corr {np.corrcoef(f_, o_)[0, 1]:.2f}, "
                   f"forecast mean {f_.mean():.1f} mm vs ERA5 {o_.mean():.1f} mm")
+
+# ---------- 5. do heavy-rain days explain the deep-layer errors? ----------
+heavy = f["rain"] >= 25
+after = heavy.shift(1, fill_value=False)
+e = pd.DataFrame({"e7": est1 - f["era_7_28"].values, "e28": est2 - f["era_28_100"].values}, index=f.index)
+print(f"\nHeavy-rain days (>=25 mm) in 2026: {int(heavy.sum())}")
+for lab, msk in [("heavy-rain day", heavy), ("day after", after), ("all other days", ~(heavy | after))]:
+    print(f"  {lab:15s} n={int(msk.sum()):3d} | 7-28: bias {e.e7[msk].mean():+.3f}, RMSE {np.sqrt((e.e7[msk]**2).mean()):.3f}"
+          f" | 28-100: bias {e.e28[msk].mean():+.3f}, RMSE {np.sqrt((e.e28[msk]**2).mean()):.3f}")
+# ---------- 6. does the 28-100 cm error depend on how wet the layer is? ----------
+e28 = pd.Series(est2 - f["era_28_100"].values, index=f.index)
+lvl = pd.qcut(f["era_28_100"], 3, labels=["driest third", "middle third", "wettest third"])
+print("\n28-100 cm error by ERA5 wetness level (2026):")
+for lab in lvl.cat.categories:
+    sel = lvl == lab
+    print(f"  {lab:14s} ERA5 {f['era_28_100'][sel].min():.3f}-{f['era_28_100'][sel].max():.3f} | "
+          f"n={int(sel.sum()):3d} | bias {e28[sel].mean():+.3f}, RMSE {np.sqrt((e28[sel]**2).mean()):.3f}")
+print(f"Day-to-day change, 28-100 cm: model std {pd.Series(est2).diff().std():.4f} "
+      f"vs ERA5 std {f['era_28_100'].diff().std():.4f}")

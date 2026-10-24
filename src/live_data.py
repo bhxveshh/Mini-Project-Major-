@@ -80,7 +80,7 @@ def build_live_table(today=None):
         raise RuntimeError("Missing weather values between the last ERA5 day and the forecast.")
 
     meta = json.loads((ROOT / "models/meta.json").read_text())
-    fc_model = joblib.load(ROOT / "models/forecast_xgb.joblib")
+    fc_model = joblib.load(ROOT / "models/forecast_xgb_fc.joblib")
     m1 = joblib.load(ROOT / "models/deep_7_28.joblib")
     m2 = joblib.load(ROOT / "models/deep_28_100.joblib")
 
@@ -88,10 +88,12 @@ def build_live_table(today=None):
     sm = daily["sm_0_7"].copy()
     one = pd.Timedelta(days=1)
     for d in daily.index[daily.index > last_obs]:
+        lead = int(np.clip((d - today).days, 1, 7))   # days ahead of today; gap days use 1
         row = {"sm_l1": sm.loc[d - one], "sm_l2": sm.loc[d - 2 * one],
                "t_max": daily.loc[d, "t_max"], "t_min": daily.loc[d, "t_min"],
-               "rh_mean": daily.loc[d, "rh_mean"], "rain": daily.loc[d, "rain"]}
-        X = pd.DataFrame([row])[meta["forecast_cols"]]
+               "rh_mean": daily.loc[d, "rh_mean"], "rain": daily.loc[d, "rain"],
+               "lead": lead}
+        X = pd.DataFrame([row])[["sm_l1", "sm_l2", "t_max", "t_min", "rh_mean", "rain", "lead"]]
         sm.loc[d] = max(float(fc_model.predict(X)[0]), 0.0)
 
     # ---- deep-layer chain on observed + forecast surface series ----

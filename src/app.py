@@ -12,7 +12,9 @@ st.title("Soil moisture forecast: Mangaluru")
 st.warning(
     "Research prototype. Values are modeled (ERA5-Land via Open-Meteo), not sensor measurements, "
     "and the models were trained on one site's reanalysis data. Not for irrigation decisions.")
-
+st.caption("Note: the 28-100 cm estimate is noisy from day to day (test RMSE 0.04, on a signal that "
+               "mostly stays between 0.05 and 0.12) and biased high on average. Use it for the "
+               "general level only, not for daily changes.")
 @st.cache_data(ttl=3600)
 def load():
     return build_live_table()
@@ -33,8 +35,7 @@ if max_h > 7:
     st.info(f"The forecast reaches {max_h} steps from the last real value, past the 7-day horizon "
             "that was validated. Days beyond step 7 are drawn dashed with no error band.")
 
-rmse = pd.read_csv(ROOT / "data/processed/real_forecast_rmse.csv", index_col="day")["Real forecast"]
-
+rmse = pd.read_csv(ROOT / "data/processed/forecast_trained_on_forecasts_rmse.csv", index_col="day")["Trained on forecasts"]
 tab1, tab2, tab3, tab4 = st.tabs(["Surface (0-7 cm)", "Deeper layers", "Evaluation", "About"])
 
 with tab1:
@@ -69,23 +70,33 @@ with tab2:
                "On past days the surface input is observed ERA5, so the lines can be compared.")
 
 with tab3:
-    st.markdown("**Frozen results from the evaluation scripts** (chronological test period, Jun-Dec 2025).")
-    for title, f in [("7-day surface forecast, R² (real ECMWF forecasts vs oracle weather vs persistence)",
-                      "real_forecast_r2.csv"),
-                     ("Same forecasts, stress-tested with simulated weather noise (R²)", "robustness_r2.csv"),
-                     ("Deep-layer estimation, base vs long-memory features", "deep_layer_v2_results.csv")]:
+    st.markdown("**Frozen results from the evaluation scripts.** Surface forecast results are an "
+                "out-of-sample test on Jan-Oct 2026; the other tables use the Jun-Dec 2025 test period.")
+    for title, f in [
+        ("Surface forecast, 2026 out-of-sample test, trained on forecasts vs persistence (R²)",
+         "forecast_trained_on_forecasts_r2.csv"),
+        ("7-day surface forecast, 2025 test: real ECMWF forecasts vs oracle weather vs persistence (R²)",
+         "real_forecast_r2.csv"),
+        ("Same forecasts, stress-tested with simulated weather noise (R²)",
+         "robustness_r2.csv"),
+        ("Deep-layer estimation, base vs long-memory features",
+         "deep_layer_v2_results.csv"),
+    ]:
         p = ROOT / "data/processed" / f
         if p.exists():
-            st.subheader(title); st.dataframe(pd.read_csv(p))
-
+            st.subheader(title)
+            st.dataframe(pd.read_csv(p))
 with tab4:
     st.markdown("""
 **Method (adapted from Gao et al., 2026, Smart Agricultural Technology):** a recursive XGBoost surface
-forecast, plus a progressive deep-layer estimator, trained on daily ERA5-Land data for Mangaluru (2023-2025).
+forecast plus a progressive deep-layer estimator, for Mangaluru. The surface forecaster is trained on
+archived ECMWF weather forecasts (2024 to Oct 2026) with lead time as an input; the deep-layer models are
+trained on daily ERA5-Land data (2023-2025).
 
 **Key limitations**
 - Target data is modeled reanalysis (about 9 km), not in-situ sensors.
-- Single location, three years of training data.
+- Single location; the 2026 evaluation covers one year, with heavily overlapping forecast origins.
 - Forecast skill falls with horizon and with rainfall-forecast error.
+- The 28-100 cm estimate is noisy day to day and biased high on average.
 - Satellite (Sentinel-1) module is a feasibility study only and is not part of this dashboard.
 """)
