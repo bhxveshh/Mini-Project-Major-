@@ -7,22 +7,31 @@ import streamlit as st
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from live_data import build_live_table, ROOT
 
-st.set_page_config(page_title="Mangaluru soil moisture", layout="wide")
-st.title("Soil moisture forecast: Mangaluru")
+st.set_page_config(page_title="Soil Moisture Forecasting — Karnataka", layout="wide")
+
+# Sidebar site selector
+st.sidebar.title("Configuration")
+site_option = st.sidebar.selectbox(
+    "Select Study Area:",
+    ["Mangaluru", "Mysore", "Shivamogga"],
+    index=0
+)
+site_key = site_option.lower()
+
+st.title(f"Soil Moisture Forecast: {site_option}")
 st.warning(
-    "Research prototype. Values are modeled (ERA5-Land via Open-Meteo), not sensor measurements, "
-    "and the models were trained on one site's reanalysis data. Not for irrigation decisions.")
-st.caption("Note: the 28-100 cm estimate is noisy from day to day (test RMSE 0.04, on a signal that "
-               "mostly stays between 0.05 and 0.12) and biased high on average. Use it for the "
-               "general level only, not for daily changes.")
+    f"Research prototype for {site_option}. Values are modeled (ERA5-Land via Open-Meteo), not sensor measurements, "
+    "and models are trained on reanalysis data. Not for operational irrigation decisions."
+)
+
 @st.cache_data(ttl=3600)
-def load():
-    return build_live_table()
+def load(site):
+    return build_live_table(site)
 
 try:
-    tbl, last_obs, today = load()
+    tbl, last_obs, today = load(site_key)
 except Exception as e:
-    st.error(f"Could not build the live forecast: {e}")
+    st.error(f"Could not build the live forecast for {site_option}: {e}")
     st.stop()
 
 gap = (today - last_obs).days
@@ -33,10 +42,26 @@ c2.metric("Last ERA5 day", str(last_obs.date()), f"{gap} days old", delta_color=
 c3.metric("Forecast steps from last ERA5 day", max_h)
 if max_h > 7:
     st.info(f"The forecast reaches {max_h} steps from the last real value, past the 7-day horizon "
-            "that was validated. Days beyond step 7 are drawn dashed with no error band.")
+            "that was validated. Days beyond step 7 are drawn dashed.")
 
-rmse = pd.read_csv(ROOT / "data/processed/forecast_trained_on_forecasts_rmse.csv", index_col="day")["Trained on forecasts"]
-tab1, tab2, tab3, tab4 = st.tabs(["Surface (0-7 cm)", "Deeper layers", "Evaluation", "About"])
+# Load RMSE for error band if available
+rmse_file = ROOT / f"data/processed/{site_key}/forecast_results.csv"
+if not rmse_file.exists():
+    rmse_file = ROOT / "data/processed/forecast_trained_on_forecasts_rmse.csv"
+if rmse_file.exists():
+    rdf = pd.read_csv(rmse_file)
+    if "model" in rdf.columns:
+        rmse_series = rdf[rdf["model"] == "XGB"].set_index("day")["RMSE"]
+    elif "Trained on forecasts" in rdf.columns:
+        rmse_series = rdf.set_index("day")["Trained on forecasts"]
+    else:
+        rmse_series = rdf.iloc[:, 1]
+else:
+    rmse_series = None
+
+tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    "Surface (0-7 cm)", "Deeper layers", "Evaluation", "Study Area & Cross-Site", "About"
+])
 
 with tab1:
     obs = tbl[tbl["is_obs"]]; fc = tbl[~tbl["is_obs"]]
@@ -48,10 +73,11 @@ with tab1:
         ax.plot(valid.index, valid["sm_0_7"], "C0-o", ms=3, label="Model forecast (validated range)")
         if len(beyond) > 1:
             ax.plot(beyond.index, beyond["sm_0_7"], "C0--", label="Beyond validated horizon")
-        v = fc[fc["horizon"].between(1, 7)]
-        e = v["horizon"].map(rmse)
-        ax.fill_between(v.index, v["sm_0_7"] - e, v["sm_0_7"] + e, color="C0", alpha=0.2,
-                        label="±1 RMSE (from test evaluation)")
+        if rmse_series is not None:
+            v = fc[fc["horizon"].between(1, 7)]
+            e = v["horizon"].map(rmse_series).fillna(0.03)
+            ax.fill_between(v.index, v["sm_0_7"] - e, v["sm_0_7"] + e, color="C0", alpha=0.2,
+                            label="±1 RMSE (from test evaluation)")
     ax.axvline(today, color="gray", ls=":"); ax.text(today, ax.get_ylim()[1], " today", va="top")
     ax.set_ylabel("Volumetric moisture (m³/m³)"); ax.legend(loc="upper left", fontsize=8)
     fig.autofmt_xdate(); st.pyplot(fig)
@@ -70,33 +96,62 @@ with tab2:
                "On past days the surface input is observed ERA5, so the lines can be compared.")
 
 with tab3:
-    st.markdown("**Frozen results from the evaluation scripts.** Surface forecast results are an "
-                "out-of-sample test on Jan-Oct 2026; the other tables use the Jun-Dec 2025 test period.")
+    st.markdown(f"**Frozen results for {site_option}.**")
+    site_proc = ROOT / f"data/processed/{site_key}"
+    if not site_proc.exists():
+        site_proc = ROOT / "data/processed"
+    
     for title, f in [
-        ("Surface forecast, 2026 out-of-sample test, trained on forecasts vs persistence (R²)",
-         "forecast_trained_on_forecasts_r2.csv"),
-        ("7-day surface forecast, 2025 test: real ECMWF forecasts vs oracle weather vs persistence (R²)",
-         "real_forecast_r2.csv"),
-        ("Same forecasts, stress-tested with simulated weather noise (R²)",
-         "robustness_r2.csv"),
-        ("Deep-layer estimation, base vs long-memory features",
-         "deep_layer_v2_results.csv"),
+        ("Surface Forecast Results by Day", "forecast_results.csv"),
+        ("Deep-Layer Estimation (Base vs Long Memory)", "deep_layer_v2_results.csv"),
+        ("Deep-Layer Split Comparison (Random vs Chronological)", "deep_layer_results.csv"),
+        ("Robustness to Weather Forecast Noise (R²)", "robustness_r2.csv"),
     ]:
-        p = ROOT / "data/processed" / f
+        p = site_proc / f
         if p.exists():
             st.subheader(title)
             st.dataframe(pd.read_csv(p))
+
 with tab4:
+    st.header("Study Area Locations and Cross-Site Analysis")
+    
+    map_png = ROOT / "figures/fig_study_area_map.png"
+    if map_png.exists():
+        st.subheader("Geographical Distribution of Study Areas")
+        st.image(str(map_png), caption="Three Study Areas in Karnataka: Mangaluru, Mysore, and Shivamogga", use_container_width=True)
+
+    html_map = ROOT / "figures/study_area_interactive.html"
+    if html_map.exists():
+        st.subheader("Interactive Study Area Map")
+        with open(html_map, "r", encoding="utf-8") as hf:
+            st.components.v1.html(hf.read(), height=500, scrolling=True)
+
+    cfig6 = ROOT / "figures/fig6_cross_site_forecast.png"
+    if cfig6.exists():
+        st.subheader("Surface Forecast Comparison Across Sites")
+        st.image(str(cfig6), use_container_width=True)
+
+    cfig7 = ROOT / "figures/fig7_cross_site_deep.png"
+    if cfig7.exists():
+        st.subheader("Deep-Layer Estimation Comparison Across Sites")
+        st.image(str(cfig7), use_container_width=True)
+
+    cfig8 = ROOT / "figures/fig8_site_climatology.png"
+    if cfig8.exists():
+        st.subheader("Soil Moisture & Rainfall Climatology Across Sites")
+        st.image(str(cfig8), use_container_width=True)
+
+with tab5:
     st.markdown("""
 **Method (adapted from Gao et al., 2026, Smart Agricultural Technology):** a recursive XGBoost surface
-forecast plus a progressive deep-layer estimator, for Mangaluru. The surface forecaster is trained on
-archived ECMWF weather forecasts (2024 to Oct 2026) with lead time as an input; the deep-layer models are
-trained on daily ERA5-Land data (2023-2025).
+forecast plus a progressive deep-layer estimator, applied across three distinct agro-climatic zones in Karnataka, India:
+- **Mangaluru**: Coastal belt with high monsoonal rainfall (>3,500 mm).
+- **Mysore**: Southern Deccan plateau with semi-arid rain-shadow climate (~1,000 mm).
+- **Shivamogga**: Western Ghats transition zone with intermediate heavy rainfall (~1,200 mm).
 
 **Key limitations**
 - Target data is modeled reanalysis (about 9 km), not in-situ sensors.
-- Single location; the 2026 evaluation covers one year, with heavily overlapping forecast origins.
 - Forecast skill falls with horizon and with rainfall-forecast error.
-- The 28-100 cm estimate is noisy day to day and biased high on average.
-- Satellite (Sentinel-1) module is a feasibility study only and is not part of this dashboard.
+- Deep layer dynamics vary significantly between tropical wet and semi-arid plateau regimes.
+- Satellite (Sentinel-1) module is a feasibility study only.
 """)

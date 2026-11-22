@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_1fd1ed7384e9803d559daea95136884d {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+<div style="position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+     z-index: 9999; background: white; padding: 10px 24px; border-radius: 8px;
+     box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-family: Arial, sans-serif;">
+  <h3 style="margin:0; color:#2C3E50;">Study Area Locations in Karnataka, India</h3>
+  <p style="margin:4px 0 0; font-size:12px; color:#666;">
+    Soil Moisture Forecasting Project — Mangaluru · Mysore · Shivamogga
+  </p>
+</div>
+    
+            <div class="folium-map" id="map_1fd1ed7384e9803d559daea95136884d" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_1fd1ed7384e9803d559daea95136884d = L.map(
+                "map_1fd1ed7384e9803d559daea95136884d",
+                {
+                    center: [13.0799, 75.57726666666666],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 8,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+            L.control.scale().addTo(map_1fd1ed7384e9803d559daea95136884d);
+
+            
+
+        
+    
+            var tile_layer_9f181c77db704bc05ef7e05f3d35b1ae = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 19,
+  "maxNativeZoom": 19,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors",
+  "subdomains": "abc",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_9f181c77db704bc05ef7e05f3d35b1ae.addTo(map_1fd1ed7384e9803d559daea95136884d);
+        
+    
+            var marker_46049fb2299c9a5528b8d2c47c22dc10 = L.marker(
+                [12.9141, 74.856],
+                {
+}
+            ).addTo(map_1fd1ed7384e9803d559daea95136884d);
+        
+    
+            var icon_bb3cb655b8d413bbed628903bf8c8fff = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "red",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_b41ad4608c2d6355e60e5f8b12a876b9 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_e60223ea9a4f92a8d353224f1da16574 = $(`<div id="html_e60223ea9a4f92a8d353224f1da16574" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial, sans-serif; width: 260px;">         <h3 style="margin:0 0 8px; color: red;">Mangaluru</h3>         <table style="border-collapse:collapse; font-size:13px;">             <tr><td style="padding:3px 8px;"><b>Coordinates</b></td>                 <td style="padding:3px 8px;">12.9141°N, 74.8560°E</td></tr>             <tr><td style="padding:3px 8px;"><b>Climate</b></td>                 <td style="padding:3px 8px;">Tropical monsoon (Am)</td></tr>             <tr><td style="padding:3px 8px;"><b>Elevation</b></td>                 <td style="padding:3px 8px;">0 – 50 m</td></tr>             <tr><td style="padding:3px 8px;"><b>Rainfall</b></td>                 <td style="padding:3px 8px;">3,000 – 4,000 mm/yr</td></tr>         </table>     </div>     </div>`)[0];
+                popup_b41ad4608c2d6355e60e5f8b12a876b9.setContent(html_e60223ea9a4f92a8d353224f1da16574);
+            
+        
+
+        marker_46049fb2299c9a5528b8d2c47c22dc10.bindPopup(popup_b41ad4608c2d6355e60e5f8b12a876b9)
+        ;
+
+        
+    
+    
+            marker_46049fb2299c9a5528b8d2c47c22dc10.bindTooltip(
+                `<div>
+                     Mangaluru
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_46049fb2299c9a5528b8d2c47c22dc10.setIcon(icon_bb3cb655b8d413bbed628903bf8c8fff);
+            
+    
+            var marker_94ca98540f640aaf9822c75caeed43b6 = L.marker(
+                [12.3537, 76.4054],
+                {
+}
+            ).addTo(map_1fd1ed7384e9803d559daea95136884d);
+        
+    
+            var icon_74ff44b24776738d703fc206d0455a0c = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "blue",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_4b2cbf3a4aec7d24ff9faef8036e1ab5 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_5641cf14c5659afd383baf3994316162 = $(`<div id="html_5641cf14c5659afd383baf3994316162" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial, sans-serif; width: 260px;">         <h3 style="margin:0 0 8px; color: blue;">Mysore</h3>         <table style="border-collapse:collapse; font-size:13px;">             <tr><td style="padding:3px 8px;"><b>Coordinates</b></td>                 <td style="padding:3px 8px;">12.3537°N, 76.4054°E</td></tr>             <tr><td style="padding:3px 8px;"><b>Climate</b></td>                 <td style="padding:3px 8px;">Semi-arid to sub-humid (BSh/Cwa)</td></tr>             <tr><td style="padding:3px 8px;"><b>Elevation</b></td>                 <td style="padding:3px 8px;">700 – 900 m</td></tr>             <tr><td style="padding:3px 8px;"><b>Rainfall</b></td>                 <td style="padding:3px 8px;">~800 mm/yr</td></tr>         </table>     </div>     </div>`)[0];
+                popup_4b2cbf3a4aec7d24ff9faef8036e1ab5.setContent(html_5641cf14c5659afd383baf3994316162);
+            
+        
+
+        marker_94ca98540f640aaf9822c75caeed43b6.bindPopup(popup_4b2cbf3a4aec7d24ff9faef8036e1ab5)
+        ;
+
+        
+    
+    
+            marker_94ca98540f640aaf9822c75caeed43b6.bindTooltip(
+                `<div>
+                     Mysore
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_94ca98540f640aaf9822c75caeed43b6.setIcon(icon_74ff44b24776738d703fc206d0455a0c);
+            
+    
+            var marker_f4a94c3673d6fa64fd0f58c38324144a = L.marker(
+                [13.9719, 75.4704],
+                {
+}
+            ).addTo(map_1fd1ed7384e9803d559daea95136884d);
+        
+    
+            var icon_5b4d14b88fc1a0224cf97fa87c7011fc = L.AwesomeMarkers.icon(
+                {
+  "markerColor": "green",
+  "iconColor": "white",
+  "icon": "info-sign",
+  "prefix": "glyphicon",
+  "extraClasses": "fa-rotate-0",
+}
+            );
+        
+    
+        var popup_2f582e60769685ebda2a7a2ff7c236c3 = L.popup({
+  "maxWidth": 300,
+});
+
+        
+            
+                var html_11ecde9f9f3134ad4a676d385746dcb7 = $(`<div id="html_11ecde9f9f3134ad4a676d385746dcb7" style="width: 100.0%; height: 100.0%;">     <div style="font-family: Arial, sans-serif; width: 260px;">         <h3 style="margin:0 0 8px; color: green;">Shivamogga</h3>         <table style="border-collapse:collapse; font-size:13px;">             <tr><td style="padding:3px 8px;"><b>Coordinates</b></td>                 <td style="padding:3px 8px;">13.9719°N, 75.4704°E</td></tr>             <tr><td style="padding:3px 8px;"><b>Climate</b></td>                 <td style="padding:3px 8px;">Western Ghats transition (Am/Cwa)</td></tr>             <tr><td style="padding:3px 8px;"><b>Elevation</b></td>                 <td style="padding:3px 8px;">500 – 800 m</td></tr>             <tr><td style="padding:3px 8px;"><b>Rainfall</b></td>                 <td style="padding:3px 8px;">~2,000 mm/yr</td></tr>         </table>     </div>     </div>`)[0];
+                popup_2f582e60769685ebda2a7a2ff7c236c3.setContent(html_11ecde9f9f3134ad4a676d385746dcb7);
+            
+        
+
+        marker_f4a94c3673d6fa64fd0f58c38324144a.bindPopup(popup_2f582e60769685ebda2a7a2ff7c236c3)
+        ;
+
+        
+    
+    
+            marker_f4a94c3673d6fa64fd0f58c38324144a.bindTooltip(
+                `<div>
+                     Shivamogga
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+                marker_f4a94c3673d6fa64fd0f58c38324144a.setIcon(icon_5b4d14b88fc1a0224cf97fa87c7011fc);
+            
+    
+            var circle_8bf4d9c322548bed0eb5e04ce36d54d5 = L.circle(
+                [12.9141, 74.856],
+                {"bubblingMouseEvents": true, "color": "red", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "red", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 5000, "stroke": true, "weight": 3}
+            ).addTo(map_1fd1ed7384e9803d559daea95136884d);
+        
+    
+            circle_8bf4d9c322548bed0eb5e04ce36d54d5.bindTooltip(
+                `<div>
+                     Mangaluru study area (approx.)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+        function geo_json_c91aa24f22b14ac0cfce1f001cf28bed_styler(feature) {
+            switch(feature.id) {
+                default:
+                    return {"color": "#1A5276", "fillColor": "#2980B9", "fillOpacity": 0.3, "weight": 2};
+            }
+        }
+
+        function geo_json_c91aa24f22b14ac0cfce1f001cf28bed_onEachFeature(feature, layer) {
+
+            layer.on({
+            });
+        };
+        var geo_json_c91aa24f22b14ac0cfce1f001cf28bed = L.geoJson(null, {
+                onEachFeature: geo_json_c91aa24f22b14ac0cfce1f001cf28bed_onEachFeature,
+            
+                style: geo_json_c91aa24f22b14ac0cfce1f001cf28bed_styler,
+            ...{
+}
+        });
+
+        function geo_json_c91aa24f22b14ac0cfce1f001cf28bed_add (data) {
+            geo_json_c91aa24f22b14ac0cfce1f001cf28bed
+                .addData(data);
+        }
+            geo_json_c91aa24f22b14ac0cfce1f001cf28bed_add({"features": [{"geometry": {"coordinates": [[[76.29080648969659, 12.495133549422786], [76.52145130029753, 12.493930019063404], [76.51982394894182, 12.212220312049302], [76.28942565549181, 12.213395888311824], [76.29080648969659, 12.495133549422786]]], "type": "Polygon"}, "id": "0", "properties": {"style_css": null}, "type": "Feature"}], "type": "FeatureCollection"});
+
+        
+    
+            geo_json_c91aa24f22b14ac0cfce1f001cf28bed.bindTooltip(
+                `<div>
+                     Mysore study area (shapefile polygon)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            geo_json_c91aa24f22b14ac0cfce1f001cf28bed.addTo(map_1fd1ed7384e9803d559daea95136884d);
+        
+    
+        function geo_json_857f0be00c343c011316a44335679b34_styler(feature) {
+            switch(feature.id) {
+                default:
+                    return {"color": "#1E8449", "fillColor": "#27AE60", "fillOpacity": 0.3, "weight": 2};
+            }
+        }
+
+        function geo_json_857f0be00c343c011316a44335679b34_onEachFeature(feature, layer) {
+
+            layer.on({
+            });
+        };
+        var geo_json_857f0be00c343c011316a44335679b34 = L.geoJson(null, {
+                onEachFeature: geo_json_857f0be00c343c011316a44335679b34_onEachFeature,
+            
+                style: geo_json_857f0be00c343c011316a44335679b34_styler,
+            ...{
+}
+        });
+
+        function geo_json_857f0be00c343c011316a44335679b34_add (data) {
+            geo_json_857f0be00c343c011316a44335679b34
+                .addData(data);
+        }
+            geo_json_857f0be00c343c011316a44335679b34_add({"features": [{"geometry": {"coordinates": [[[75.29071929865749, 13.869088786576215], [75.34469911758622, 14.134306137147462], [75.65027253371727, 14.074545433548824], [75.59568481737475, 13.80940361207675], [75.29071929865749, 13.869088786576215]]], "type": "Polygon"}, "id": "0", "properties": {"id": 1}, "type": "Feature"}], "type": "FeatureCollection"});
+
+        
+    
+            geo_json_857f0be00c343c011316a44335679b34.bindTooltip(
+                `<div>
+                     Shivamogga study area (shapefile polygon)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            geo_json_857f0be00c343c011316a44335679b34.addTo(map_1fd1ed7384e9803d559daea95136884d);
+        
+    
+            var layer_control_97ba6d247340846506b003e8efa5d497_layers = {
+                base_layers : {
+                    "openstreetmap" : tile_layer_9f181c77db704bc05ef7e05f3d35b1ae,
+                },
+                overlays :  {
+                    "Mysore Study Area" : geo_json_c91aa24f22b14ac0cfce1f001cf28bed,
+                    "Shivamogga Study Area" : geo_json_857f0be00c343c011316a44335679b34,
+                },
+            };
+            let layer_control_97ba6d247340846506b003e8efa5d497 = L.control.layers(
+                layer_control_97ba6d247340846506b003e8efa5d497_layers.base_layers,
+                layer_control_97ba6d247340846506b003e8efa5d497_layers.overlays,
+                {
+  "position": "topright",
+  "collapsed": true,
+  "autoZIndex": true,
+}
+            ).addTo(map_1fd1ed7384e9803d559daea95136884d);
+
+        
+    
+            map_1fd1ed7384e9803d559daea95136884d.fitBounds(
+                [[12.012220312049303, 74.65599999999999], [14.334306137147461, 76.72145130029753]],
+                {}
+            );
+        
+</script>
+</html>

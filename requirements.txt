@@ -6,3 +6,6 @@ xgboost
 matplotlib
 earthengine-api
 geemap
+geopandas
+shapely
+folium

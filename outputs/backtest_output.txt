@@ -1,0 +1,75 @@
+ERA5 days: 2025-11-01 to 2026-10-23
+
+=== Deep layer 7-28 cm vs ERA5 ===
+                  n       R2    RMSE    bias
+ALL 2026      296.0   0.9746  0.0173 -0.0037
+last 14 days   14.0   0.5701  0.0246  0.0022
+2026-01        31.0  -5.5954  0.0044  0.0028
+2026-02        28.0 -44.6895  0.0058 -0.0036
+2026-03        31.0  -1.1409  0.0150 -0.0071
+2026-04        30.0  -2.9602  0.0151 -0.0136
+2026-05        31.0   0.8721  0.0309 -0.0195
+2026-06        30.0   0.9209  0.0176 -0.0093
+2026-07        31.0   0.9342  0.0108  0.0016
+2026-08        31.0   0.9185  0.0096 -0.0013
+2026-09        30.0   0.7485  0.0248  0.0123
+2026-10        23.0   0.5823  0.0199  0.0022
+(chronological-test RMSE from earlier evaluation: 0.0142)
+
+=== Deep layer 28-100 cm vs ERA5 ===
+                  n        R2    RMSE    bias
+ALL 2026      296.0    0.8041  0.0398  0.0105
+last 14 days   14.0 -215.6967  0.0457  0.0348
+2026-01        31.0   -0.7366  0.0158  0.0035
+2026-02        28.0  -75.5370  0.0329  0.0322
+2026-03        31.0  -16.3241  0.0375  0.0341
+2026-04        30.0    0.1554  0.0210 -0.0043
+2026-05        31.0   -0.7966  0.0477 -0.0046
+2026-06        30.0    0.3362  0.0646 -0.0431
+2026-07        31.0    0.4377  0.0520  0.0396
+2026-08        31.0    0.7350  0.0287  0.0201
+2026-09        30.0   -0.3786  0.0332  0.0064
+2026-10        23.0   -8.8170  0.0399  0.0243
+(chronological-test RMSE from earlier evaluation: 0.0395)
+
+=== 7-day forecast backtest: 276 origins, 2026-01-01 to 2026-10-16 ===
+R2:
+      Oracle (ERA5 weather)  Persistence  Real forecast
+day                                                   
+1                   0.9743       0.9274         0.9228
+2                   0.9559       0.8458         0.8437
+3                   0.9385       0.7776         0.7745
+4                   0.9281       0.7149         0.7166
+5                   0.9172       0.6683         0.6493
+6                   0.9108       0.6369         0.6101
+7                   0.9036       0.5981         0.5860
+
+RMSE:
+      Oracle (ERA5 weather)  Persistence  Real forecast
+day                                                   
+1                   0.0194       0.0327         0.0337
+2                   0.0254       0.0476         0.0479
+3                   0.0300       0.0571         0.0575
+4                   0.0325       0.0646         0.0644
+5                   0.0348       0.0697         0.0717
+6                   0.0361       0.0729         0.0755
+7                   0.0375       0.0766         0.0778
+
+RMSE by season:
+          season  day   n  RMSE oracle  RMSE persist  RMSE real
+dry/pre-monsoon    1 154       0.0214        0.0305     0.0338
+dry/pre-monsoon    3 154       0.0337        0.0512     0.0537
+dry/pre-monsoon    7 154       0.0417        0.0697     0.0737
+monsoon Jun-Sep    1 122       0.0166        0.0353     0.0335
+monsoon Jun-Sep    3 122       0.0245        0.0637     0.0619
+monsoon Jun-Sep    7 122       0.0315        0.0845     0.0827
+
+dry/pre-monsoon lead 1d rain: corr 0.66, forecast mean 2.9 mm vs ERA5 2.8 mm
+dry/pre-monsoon lead 7d rain: corr 0.55, forecast mean 4.5 mm vs ERA5 4.3 mm
+monsoon Jun-Sep lead 1d rain: corr 0.72, forecast mean 17.3 mm vs ERA5 17.2 mm
+monsoon Jun-Sep lead 7d rain: corr 0.59, forecast mean 19.4 mm vs ERA5 15.7 mm
+
+Heavy-rain days (>=25 mm) in 2026: 33
+  heavy-rain day  n= 33 | 7-28: bias -0.003, RMSE 0.026 | 28-100: bias +0.002, RMSE 0.042
+  day after       n= 32 | 7-28: bias -0.008, RMSE 0.024 | 28-100: bias +0.003, RMSE 0.046
+  all other days  n=249 | 7-28: bias -0.004, RMSE 0.015 | 28-100: bias +0.012, RMSE 0.038

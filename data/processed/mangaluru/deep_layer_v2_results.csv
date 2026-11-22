@@ -1,0 +1,13 @@
+features,model,layer,R2,RMSE,MAE
+base (paper-style),LR,7-28cm,0.9216,0.027,0.0199
+base (paper-style),LR,28-100cm,0.4573,0.0576,0.0494
+base (paper-style),RF,7-28cm,0.9382,0.024,0.0181
+base (paper-style),RF,28-100cm,0.4065,0.0602,0.0468
+base (paper-style),XGB,7-28cm,0.9221,0.0269,0.0203
+base (paper-style),XGB,28-100cm,0.3518,0.0629,0.0498
+base + long memory,LR,7-28cm,0.9626,0.0186,0.0145
+base + long memory,LR,28-100cm,0.6642,0.0453,0.0387
+base + long memory,RF,7-28cm,0.9697,0.0168,0.0128
+base + long memory,RF,28-100cm,0.7005,0.0428,0.0331
+base + long memory,XGB,7-28cm,0.9785,0.0142,0.0112
+base + long memory,XGB,28-100cm,0.7439,0.0395,0.0328

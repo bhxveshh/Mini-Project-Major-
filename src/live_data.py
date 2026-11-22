@@ -6,8 +6,14 @@ import requests
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-LAT, LON = 12.9141, 74.8560          # same site as the training data
+LAT, LON = 12.9141, 74.8560          # default (Mangaluru)
 TZ = "Asia/Kolkata"
+
+SITE_COORDS = {
+    "mangaluru": (12.9141, 74.8560),
+    "mysore": (12.3537, 76.4054),
+    "shivamogga": (13.9719, 75.4704),
+}
 
 W_VARS = ["temperature_2m", "relative_humidity_2m", "surface_pressure",
           "wind_speed_10m", "precipitation"]
@@ -44,14 +50,14 @@ def _daily_sm(h):
     d.loc[~(g["soil_moisture_0_to_7cm"].count() >= 23)] = np.nan
     return d
 
-def fetch_observed(today):
+def fetch_observed(today, lat=LAT, lon=LON):
     """ERA5-Land from the Open-Meteo archive; find the latest complete day."""
     start = (today - pd.Timedelta(days=150)).date().isoformat()
     last_err = None
     for back in [1, 3, 7, 10]:                     # retry if the end date is not yet available
         try:
             h = _get("https://archive-api.open-meteo.com/v1/archive", {
-                "latitude": LAT, "longitude": LON, "start_date": start,
+                "latitude": lat, "longitude": lon, "start_date": start,
                 "end_date": (today - pd.Timedelta(days=back)).date().isoformat(),
                 "hourly": ",".join(W_VARS + SM_VARS), "timezone": TZ})
             break
@@ -62,27 +68,42 @@ def fetch_observed(today):
     obs = pd.concat([_daily_weather(h), _daily_sm(h)], axis=1)
     return obs.dropna(subset=["sm_0_7"] + WEATHER_COLS)
 
-def fetch_forecast_weather():
+def fetch_forecast_weather(lat=LAT, lon=LON):
     h = _get("https://api.open-meteo.com/v1/forecast", {
-        "latitude": LAT, "longitude": LON, "hourly": ",".join(W_VARS),
+        "latitude": lat, "longitude": lon, "hourly": ",".join(W_VARS),
         "past_days": 30, "forecast_days": 8, "timezone": TZ})
     return _daily_weather(h)
 
-def build_live_table(today=None):
+def build_live_table(site="mangaluru", today=None):
     today = today or pd.Timestamp.now(tz=TZ).normalize().tz_localize(None)
-    obs = fetch_observed(today)
+    site_key = str(site).strip().lower()
+    lat, lon = SITE_COORDS.get(site_key, (LAT, LON))
+
+    obs = fetch_observed(today, lat=lat, lon=lon)
     last_obs = obs.index[-1]
-    fw = fetch_forecast_weather()
+    fw = fetch_forecast_weather(lat=lat, lon=lon)
     fut = fw[fw.index > last_obs].dropna(subset=WEATHER_COLS)
     daily = pd.concat([obs, fut]).asfreq("D")
     daily[WEATHER_COLS] = daily[WEATHER_COLS].interpolate(limit=2, limit_area="inside")
     if daily[WEATHER_COLS].isna().any().any():
         raise RuntimeError("Missing weather values between the last ERA5 day and the forecast.")
 
-    meta = json.loads((ROOT / "models/meta.json").read_text())
-    fc_model = joblib.load(ROOT / "models/forecast_xgb_fc.joblib")
-    m1 = joblib.load(ROOT / "models/deep_7_28.joblib")
-    m2 = joblib.load(ROOT / "models/deep_28_100.joblib")
+    mdl_dir = ROOT / f"models/{site_key}" if (ROOT / f"models/{site_key}").exists() else ROOT / "models"
+    meta = json.loads((mdl_dir / "meta.json").read_text())
+
+    fc_path = mdl_dir / "forecast_xgb_fc.joblib"
+    if not fc_path.exists():
+        fc_path = mdl_dir / "forecast_xgb.joblib"
+    if not fc_path.exists():
+        fc_path = ROOT / "models/forecast_xgb.joblib"
+    fc_model = joblib.load(fc_path)
+
+    m1_path = mdl_dir / "deep_7_28.joblib" if (mdl_dir / "deep_7_28.joblib").exists() else ROOT / "models/deep_7_28.joblib"
+    m2_path = mdl_dir / "deep_28_100.joblib" if (mdl_dir / "deep_28_100.joblib").exists() else ROOT / "models/deep_28_100.joblib"
+    m1 = joblib.load(m1_path)
+    m2 = joblib.load(m2_path)
+
+    fcols = meta.get("forecast_cols", ["sm_l1", "sm_l2", "t_max", "t_min", "rh_mean", "rain"])
 
     # ---- recursive surface forecast through the gap and ahead ----
     sm = daily["sm_0_7"].copy()
@@ -91,9 +112,10 @@ def build_live_table(today=None):
         lead = int(np.clip((d - today).days, 1, 7))   # days ahead of today; gap days use 1
         row = {"sm_l1": sm.loc[d - one], "sm_l2": sm.loc[d - 2 * one],
                "t_max": daily.loc[d, "t_max"], "t_min": daily.loc[d, "t_min"],
-               "rh_mean": daily.loc[d, "rh_mean"], "rain": daily.loc[d, "rain"],
-               "lead": lead}
-        X = pd.DataFrame([row])[["sm_l1", "sm_l2", "t_max", "t_min", "rh_mean", "rain", "lead"]]
+               "rh_mean": daily.loc[d, "rh_mean"], "rain": daily.loc[d, "rain"]}
+        if "lead" in fcols:
+            row["lead"] = lead
+        X = pd.DataFrame([row])[fcols]
         sm.loc[d] = max(float(fc_model.predict(X)[0]), 0.0)
 
     # ---- deep-layer chain on observed + forecast surface series ----
